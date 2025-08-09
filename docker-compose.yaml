@@ -10,6 +10,29 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
+  task-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-api
+    restart: always
+    environment:
+      NODE_ENV: production
+      DB_HOST: task-db
+      DB_PORT: 5432
+      DB_USERNAME: task_username
+      DB_PASSWORD: task_password
+      DB_NAME: task_db
+    command: >
+      sh -c "
+        npm run migration:run &&
+        npm run test &&
+        npm run test:e2e &&
+        npm run start:prod
+      "
+    ports:
+      - "3000:3000"
+    depends_on:
+      - task-db
 volumes:
   pgdata:
