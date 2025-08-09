@@ -106,4 +106,49 @@ describe('Tasks End to End API', () => {
       .send({ description: 'Missing title' })
       .expect(400);
   });
+
+  it('/tasks/:id (- Retrieve Specific Task with Missing Data - GET)', async () => {
+    await request(app.getHttpServer())
+      .post('/tasks')
+      .send({ title: 'Get One', description: 'desc' })
+      .expect(201);
+
+    const taskId = 'Not UUID';
+
+    await request(app.getHttpServer())
+      .get(`/tasks/${taskId}`)
+      .expect(404);
+  });
+
+  it('/tasks/:id (- Update Specific Task with Missing Data - PATCH)', async () => {
+    await request(app.getHttpServer())
+      .post('/tasks')
+      .send({ title: 'Update Me' })
+      .expect(201);
+
+    const taskId = 'Not UUID';
+
+    const updateDto = { title: 'Updated Title', status: 'TO_DO' };
+
+    await request(app.getHttpServer())
+      .patch(`/tasks/${taskId}`)
+      .send(updateDto)
+      .expect(404);
+  });
+
+  it('/tasks/:id (- Update Specific Task with Different Enum Status - PATCH)', async () => {
+    const createRes = await request(app.getHttpServer())
+      .post('/tasks')
+      .send({ title: 'Update Me' })
+      .expect(201);
+
+    const taskId = createRes.body.id;
+
+    const updateDto = { title: 'Updated Title', status: 'UNAVAILABLE' };
+
+    await request(app.getHttpServer())
+      .patch(`/tasks/${taskId}`)
+      .send(updateDto)
+      .expect(400);
+  });
 });
